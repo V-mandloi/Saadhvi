@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 
 const initialDoctor = {
@@ -56,34 +57,133 @@ export default function Register() {
   };
 
   return (
-    <div style={{ maxWidth: 500, margin: "40px auto", padding: 24, border: "1px solid #eee", borderRadius: 8 }}>
+    <div
+      style={{
+        maxWidth: 500,
+        margin: "40px auto",
+        padding: 24,
+        border: "1px solid #eee",
+        borderRadius: 8,
+      }}>
       <h2>Register as</h2>
-      <select value={role} onChange={handleRoleChange} style={{ marginBottom: 16 }}>
+      <select
+        value={role}
+        onChange={handleRoleChange}
+        style={{ marginBottom: 16 }}>
         <option value="doctor">Doctor</option>
         <option value="hospital">Hospital</option>
       </select>
       <form onSubmit={handleSubmit}>
         {role === "doctor" ? (
           <>
-            <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" required className="input" />
-            <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" required className="input" />
-            <input name="degreeRegNumber" value={form.degreeRegNumber} onChange={handleChange} placeholder="Degree Registration Number" required className="input" />
-            <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" required className="input" />
-            <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" required className="input" />
-            <input name="address" value={form.address} onChange={handleChange} placeholder="Address" required className="input" />
+            <input
+              name="firstName"
+              value={form.firstName}
+              onChange={handleChange}
+              placeholder="First Name"
+              required
+              className="input"
+            />
+            <input
+              name="lastName"
+              value={form.lastName}
+              onChange={handleChange}
+              placeholder="Last Name"
+              required
+              className="input"
+            />
+            <input
+              name="degreeRegNumber"
+              value={form.degreeRegNumber}
+              onChange={handleChange}
+              placeholder="Degree Registration Number"
+              required
+              className="input"
+            />
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Email"
+              required
+              className="input"
+            />
+            <input
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              placeholder="Phone Number"
+              required
+              className="input"
+            />
+            <input
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+              placeholder="Address"
+              required
+              className="input"
+            />
           </>
         ) : (
           <>
-            <input name="hospitalName" value={form.hospitalName} onChange={handleChange} placeholder="Hospital Name" required className="input" />
-            <input name="hospitalRegNumber" value={form.hospitalRegNumber} onChange={handleChange} placeholder="Hospital Registration Number" required className="input" />
-            <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" required className="input" />
-            <input name="contact" value={form.contact} onChange={handleChange} placeholder="Contact Number" required className="input" />
-            <input name="address" value={form.address} onChange={handleChange} placeholder="Address" required className="input" />
+            <input
+              name="hospitalName"
+              value={form.hospitalName}
+              onChange={handleChange}
+              placeholder="Hospital Name"
+              required
+              className="input"
+            />
+            <input
+              name="hospitalRegNumber"
+              value={form.hospitalRegNumber}
+              onChange={handleChange}
+              placeholder="Hospital Registration Number"
+              required
+              className="input"
+            />
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Email"
+              required
+              className="input"
+            />
+            <input
+              name="contact"
+              value={form.contact}
+              onChange={handleChange}
+              placeholder="Contact Number"
+              required
+              className="input"
+            />
+            <input
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+              placeholder="Address"
+              required
+              className="input"
+            />
           </>
         )}
-        <button type="submit" style={{ marginTop: 16, width: "100%" }}>Register</button>
+        <button type="submit" style={{ marginTop: 16, width: "100%" }}>
+          Register
+        </button>
       </form>
-      {message && <div style={{ marginTop: 16, color: message.includes("success") ? "green" : "red" }}>{message}</div>}
+      {message && (
+        <div
+          style={{
+            marginTop: 16,
+            color: message.includes("success") ? "green" : "red",
+          }}>
+          {message}
+        </div>
+      )}
       <style jsx>{`
         .input {
           display: block;
