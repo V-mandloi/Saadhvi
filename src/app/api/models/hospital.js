@@ -28,8 +28,14 @@ const hospitalSchema = new mongoose.Schema({
     required: true,
     trim: true,
     lowercase: true
+    
   },
   address: {
+    type: String,
+    required: true,
+    trim: true
+  },
+    password: {
     type: String,
     required: true,
     trim: true

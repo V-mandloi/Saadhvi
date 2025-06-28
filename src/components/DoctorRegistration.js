@@ -1,49 +1,63 @@
 "use client";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+
 function DoctorRegistration() {
   const nameref = useRef();
-  const specializationref=useRef();
-  const experienceref =useRef();
-  const contactref =useRef();
-  const emailref =useRef();
-  const hospitalref =useRef();
-  const handlesubmint = async (e) => {
-  e.preventDefault();
+  const specializationref = useRef();
+  const experienceref = useRef();
+  const contactref = useRef();
+  const emailref = useRef();
+  const hospitalref = useRef();
+  const passwordRef = useRef();
+  const confirmPasswordRef = useRef();
 
-  const doctorData = {
-    name: nameref.current.value,
-    specialization: specializationref.current.value,
-    experience: experienceref.current.value,
-    contact: contactref.current.value,
-    email: emailref.current.value,
-    hospital: hospitalref.current.value
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handlesubmint = async (e) => {
+    e.preventDefault();
+
+    const password = passwordRef.current.value;
+    const confirmPassword = confirmPasswordRef.current.value;
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    const doctorData = {
+      name: nameref.current.value,
+      specialization: specializationref.current.value,
+      experience: experienceref.current.value,
+      contact: contactref.current.value,
+      email: emailref.current.value,
+      hospital: hospitalref.current.value,
+      password: password
+    };
+
+    try {
+      const response = await fetch("/api/doctor", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(doctorData)
+      });
+
+      const result = await response.json();
+      alert(result.message || "Doctor registered!");
+    } catch (error) {
+      alert("Error registering doctor");
+      console.error(error);
+    }
   };
 
-  try {
-    const response = await fetch("/api/doctor", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(doctorData)
-    });
+  const handleDoctor = () => {
+    console.log("Show doctors — logic will be added later");
+  };
 
-    const result = await response.json();
-    alert(result.message || "Doctor registered!");
-  } catch (error) {
-    alert("Error registering doctor");
-    console.error(error);
-  }
-};
-
-
-const handleDoctor = () => {
-  console.log("Show doctors — logic will be added later");
-};
-
- 
   return (
     <div className="container mt-5 d-flex justify-content-center">
       <div className="card shadow-lg p-4" style={{ maxWidth: '500px', backgroundColor: '#f4f8fb', borderRadius: '10px' }}>
@@ -73,13 +87,48 @@ const handleDoctor = () => {
             <label className="form-label">Hospital Name</label>
             <input type="text" ref={hospitalref} placeholder="Enter hospital name" required className="form-control" />
           </div>
+          <div className="mb-3">
+            <label className="form-label">Password</label>
+            <div className="input-group">
+              <input
+                type={showPassword ? "text" : "password"}
+                ref={passwordRef}
+                placeholder="Enter password"
+                required
+                className="form-control"
+              />
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Confirm Password</label>
+            <div className="input-group">
+              <input
+                type={showConfirm ? "text" : "password"}
+                ref={confirmPasswordRef}
+                placeholder="Confirm password"
+                required
+                className="form-control"
+              />
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => setShowConfirm(!showConfirm)}
+              >
+                {showConfirm ? "Hide" : "Show"}
+              </button>
+            </div>
+          </div>
           <button type="submit" className="btn btn-primary w-100 mb-3">Register</button>
-          
         </form>
         <button className="btn btn-info w-100" onClick={handleDoctor}>Show-Doctors</button>
       </div>
-    
-
     </div>
   );
 }

@@ -7,6 +7,7 @@ const DoctorSchema = new mongoose.Schema({
   contact: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   hospital: { type: String, required: true },
+  password: { type: String, required: true, trim: true}
 }, { timestamps: true });
 
 const Doctor = mongoose.model('Doctor', DoctorSchema);
