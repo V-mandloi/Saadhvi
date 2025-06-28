@@ -9,10 +9,35 @@ function DoctorRegistration() {
   const contactref =useRef();
   const emailref =useRef();
   const hospitalref =useRef();
-  const handlesubmint = (e) => {
+  const handlesubmint = async (e) => {
   e.preventDefault();
-  console.log("Submit clicked — logic will be added soon");
+
+  const doctorData = {
+    name: nameref.current.value,
+    specialization: specializationref.current.value,
+    experience: experienceref.current.value,
+    contact: contactref.current.value,
+    email: emailref.current.value,
+    hospital: hospitalref.current.value
+  };
+
+  try {
+    const response = await fetch("/api/doctor", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(doctorData)
+    });
+
+    const result = await response.json();
+    alert(result.message || "Doctor registered!");
+  } catch (error) {
+    alert("Error registering doctor");
+    console.error(error);
+  }
 };
+
 
 const handleDoctor = () => {
   console.log("Show doctors — logic will be added later");

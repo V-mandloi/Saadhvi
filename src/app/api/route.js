@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import clientPromise, { testConnection } from "./db/connectMongo";
 
+
 export async function GET(request) {
   try {
     const isConnected = await testConnection();
@@ -23,3 +24,5 @@ export async function GET(request) {
     );
   }
 }
+
+
