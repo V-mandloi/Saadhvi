@@ -1,3 +1,4 @@
+// /app/api/doctor/route.js
 import clientPromise from "../../../../lib/mongodb";
 import bcrypt from "bcrypt";
 
@@ -7,8 +8,6 @@ export async function POST(req) {
     const client = await clientPromise;
     const db = client.db();
 
-    const body = await req.json();
-
     const {
       name,
       specialization,
@@ -17,11 +16,20 @@ export async function POST(req) {
       email,
       hospital,
       password
-    } = body;
+    } = await req.json();
 
-    // Hash the password
+    // Check if doctor already exists
+    const existing = await db.collection("doctors").findOne({ email });
+    if (existing) {
+      return new Response(JSON.stringify({ error: "Doctor already exists" }), {
+        status: 409
+      });
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Insert doctor
     const result = await db.collection("doctors").insertOne({
       name,
       specialization,
@@ -30,19 +38,20 @@ export async function POST(req) {
       email,
       hospital,
       password: hashedPassword,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 
     return new Response(JSON.stringify({
-      message: "Doctor Registered Successfully",
+      message: "Doctor registered successfully",
       doctorId: result.insertedId
     }), {
-      status: 200,
+      status: 201,
       headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error("Doctor Registration Error:", error);
+    console.error("POST /doctor error:", error);
     return new Response(JSON.stringify({ error: "Doctor registration failed" }), {
       status: 500
     });
@@ -50,7 +59,7 @@ export async function POST(req) {
 }
 
 // GET: Fetch all doctors
-export async function GET(req) {
+export async function GET() {
   try {
     const client = await clientPromise;
     const db = client.db();
@@ -59,13 +68,11 @@ export async function GET(req) {
 
     return new Response(JSON.stringify(doctors), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error("Fetch Doctors Error:", error);
+    console.error("GET /doctor error:", error);
     return new Response(JSON.stringify({ error: "Failed to fetch doctors" }), {
       status: 500
     });

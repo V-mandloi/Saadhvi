@@ -1,68 +1,72 @@
+// src/app/api/hospital/route.js
+
+import { NextResponse } from 'next/server';
 import clientPromise from "../../../../lib/mongodb";
 import bcrypt from "bcrypt";
 
-export async function POST(req) {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const body = await req.json();
- 
-
-    const {
-      name,
-      specialization,
-      registrationNumber,
-      contact,
-      email,
-      address,
-      password
-    } = body;
-  
-     const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await db.collection("hospitals").insertOne({
-      name,
-      specialization,
-      registrationNumber,
-      contact,
-      email,
-      address,
-      password : hashedPassword,
-      createdAt: new Date()
-    });
-
-    return new Response(JSON.stringify({
-      message: "Hospital Registered Successfully",
-      hospitalId: result.insertedId
-    }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-  } catch (error) {
-    console.error("Hospital Registration Error:", error);
-    return new Response(JSON.stringify({ error: "Hospital registration failed" }), {
-      status: 500
-    });
-  }
-}
-
-// ✅ GET Request: Fetch all hospitals
+// GET all hospitals
 export async function GET() {
   try {
     const client = await clientPromise;
-    const db = client.db();
+    // highlight-start
+    const db = client.db("saadhvi_db"); 
+    // highlight-end
 
-    const hospitals = await db.collection("hospitals").find().toArray();
+    const hospitals = await db
+      .collection("hospitals")
+      .find({})
+      .project({ password: 0 }) 
+      .toArray();
 
-    return new Response(JSON.stringify(hospitals), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-
+    return NextResponse.json(hospitals);
   } catch (error) {
-    console.error("Fetch Hospitals Error:", error);
-    return new Response(JSON.stringify({ error: "Failed to fetch hospitals" }), {
-      status: 500
-    });
+    console.error("API GET Error:", error);
+    return NextResponse.json({ error: 'Failed to fetch hospitals' }, { status: 500 });
+  }
+}
+
+// CREATE a new hospital
+export async function POST(request) {
+  try {
+    const client = await clientPromise;
+    // highlight-start
+    const db = client.db("saadhvi_db"); 
+    // highlight-end
+    const collection = db.collection("hospitals");
+
+    const data = await request.json();
+    const { email, password, name, registrationNumber } = data;
+
+    // Check if required fields are present
+    if (!email || !password || !name || !registrationNumber) {
+        return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+    }
+
+    // Check if hospital already exists
+    const existingHospital = await collection.findOne({ email });
+    if (existingHospital) {
+      return NextResponse.json({ error: "Hospital with this email already exists." }, { status: 400 });
+    }
+
+    // Manually hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Prepare data for insertion
+    const hospitalToInsert = {
+      ...data,
+      password: hashedPassword, // Replace plain password with hashed password
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const result = await collection.insertOne(hospitalToInsert);
+    
+    // Don't send back the password in the response
+    delete hospitalToInsert.password;
+
+    return NextResponse.json({ message: "Hospital Registered Successfully!", hospital: hospitalToInsert }, { status: 201 });
+  } catch (error) {
+    console.error("API POST Error:", error);
+    return NextResponse.json({ error: 'Failed to create hospital' }, { status: 500 });
   }
 }

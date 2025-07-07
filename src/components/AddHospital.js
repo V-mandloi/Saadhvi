@@ -1,148 +1,115 @@
 "use client";
-
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
-function AddHospital() {
-  const nameref = useRef();
-  const specializationref = useRef();
-  const registrationref = useRef();
-  const contactref = useRef();
-  const emailref = useRef();
-  const addressref = useRef();
-  const passwordref = useRef();
-  const confirmPasswordref = useRef();
+export default function AddHospital() {
+  const [formData, setFormData] = useState({
+    name: '',
+    specialization: '',
+    registrationNumber: '',
+    contact: '',
+    email: '',
+    address: '',
+    password: '',
+  });
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handlesubmint = async (e) => {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const password = passwordref.current.value;
-    const confirmPassword = confirmPasswordref.current.value;
-
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+    if (formData.password !== confirmPassword) {
+      alert("Passwords do not match.");
       return;
     }
 
-    const data = {
-      name: nameref.current.value,
-      specialization: specializationref.current.value,
-      registrationNumber: registrationref.current.value,
-      contact: contactref.current.value,
-      email: emailref.current.value,
-      address: addressref.current.value,
-      password: password
-    };
-
-    console.log(data);
+    if (formData.password.length < 6) {
+      alert("Password must be at least 6 characters.");
+      return;
+    }
 
     try {
-      const res = await fetch("/api/hospital", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+      const res = await fetch('/api/hospital', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
 
       const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Something went wrong");
 
-      if (res.ok) {
-        alert("Hospital Registered Successfully!");
-        console.log("Response:", result);
-      } else {
-        alert(result.error || "Something went wrong.");
-        console.error("Error:", result);
-      }
+      alert("Hospital registered successfully!");
+      setFormData({
+        name: '',
+        specialization: '',
+        registrationNumber: '',
+        contact: '',
+        email: '',
+        address: '',
+        password: '',
+      });
+      setConfirmPassword('');
+      console.log(formData);
     } catch (err) {
-      alert("Error occurred while submitting.");
-      console.error("Submit Error:", err);
+      alert(err.message);
     }
   };
 
-  const showHospitals = () => {
-    console.log("Show doctors — logic will be added later");
-  };
-
   return (
-    <div className="container mt-5 d-flex justify-content-center">
-      <div className="card shadow-lg p-4" style={{ maxWidth: '500px', backgroundColor: '#f4f8fb', borderRadius: '10px' }}>
-        <h2 className="text-center mb-4 text-primary">Hospital Registration</h2>
-        <form onSubmit={handlesubmint}>
+    <div className="container-fluid d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', background: 'linear-gradient(to right, #e3f2fd, #f1f8ff)' }}>
+      <div className="card shadow-lg p-4 p-md-5" style={{ maxWidth: '650px', width: '100%', borderRadius: '20px', backgroundColor: '#ffffff' }}>
+        <h2 className="text-center mb-4 text-primary fw-bold">Hospital Registration</h2>
+        <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label className="form-label">Hospital Name</label>
-            <input type="text" ref={nameref} placeholder="Enter hospital name" required className="form-control" />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Specialization</label>
-            <input type="text" ref={specializationref} placeholder="Enter specialization" required className="form-control" />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Registration - Number</label>
-            <input type="text" ref={registrationref} placeholder="Enter hospital registration" required className="form-control" />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Contact Number</label>
-            <input type="text" ref={contactref} placeholder="Enter contact number" required className="form-control" />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Email Address</label>
-            <input type="email" ref={emailref} placeholder="Enter email" required className="form-control" />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Address</label>
-            <input type="text" ref={addressref} placeholder="Enter hospital address" required className="form-control" />
+            <label className="form-label fw-semibold">Hospital Name</label>
+            <input type="text" name="name" value={formData.name} onChange={handleChange} required className="form-control rounded-3 p-2" placeholder="e.g., City Care Hospital" />
           </div>
 
-          {/* Password Field with toggle */}
           <div className="mb-3">
-            <label className="form-label">Password</label>
-            <div className="input-group">
-              <input
-                type={showPassword ? "text" : "password"}
-                ref={passwordref}
-                placeholder="Enter password"
-                required
-                className="form-control"
-              />
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
+            <label className="form-label fw-semibold">Specialization</label>
+            <input type="text" name="specialization" value={formData.specialization} onChange={handleChange} required className="form-control rounded-3 p-2" placeholder="e.g., Cardiology, Orthopedic" />
           </div>
 
-          {/* Confirm Password Field with toggle */}
           <div className="mb-3">
-            <label className="form-label">Confirm Password</label>
-            <div className="input-group">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                ref={confirmPasswordref}
-                placeholder="Confirm password"
-                required
-                className="form-control"
-              />
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? "Hide" : "Show"}
-              </button>
-            </div>
+            <label className="form-label fw-semibold">Registration Number</label>
+            <input type="text" name="registrationNumber" value={formData.registrationNumber} onChange={handleChange} required className="form-control rounded-3 p-2" placeholder="Hospital Reg. No." />
           </div>
 
-          <button type="submit" className="btn btn-primary w-100 mb-3">Register</button>
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Contact Number</label>
+            <input type="tel" name="contact" value={formData.contact} onChange={handleChange} required className="form-control rounded-3 p-2" placeholder="e.g., 9876543210" />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Email</label>
+            <input type="email" name="email" value={formData.email} onChange={handleChange} required className="form-control rounded-3 p-2" placeholder="e.g., contact@hospital.com" />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Address</label>
+            <textarea name="address" value={formData.address} onChange={handleChange} rows={2} required className="form-control rounded-3 p-2" placeholder="Full Address"></textarea>
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Password</label>
+            <input type="password" name="password" value={formData.password} onChange={handleChange} required className="form-control rounded-3 p-2" placeholder="Min. 6 characters" />
+          </div>
+
+          <div className="mb-4">
+            <label className="form-label fw-semibold">Confirm Password</label>
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="form-control rounded-3 p-2" placeholder="Re-enter password" />
+          </div>
+
+          <button type="submit" className="btn btn-primary w-100 mb-2 rounded-pill">Register Hospital</button>
         </form>
-        <button className="btn btn-info w-100" onClick={showHospitals}>Show-All-Hospitals</button>
       </div>
     </div>
   );
 }
-
-export default AddHospital;

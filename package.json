@@ -18,6 +18,8 @@
     "mongoose": "^8.16.0",
     "next": "15.3.3",
     "react": "^19.0.0",
+    "react-bootstrap": "^2.10.10",
+    "react-bootstrap-icons": "^1.11.6",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
