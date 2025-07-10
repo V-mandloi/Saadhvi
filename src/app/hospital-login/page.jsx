@@ -28,11 +28,11 @@ export default function HospitalLogin() {
       const data = await res.json();
 
       if (res.ok && data.hospitalExists !== false) {
-        setMessage("✅ Login successful!");
+        setMessage(" Login successful!");
         setMessageType("success");
         // Redirect or store session here
       } else {
-        setMessage(data.error || "❌ Login failed");
+        setMessage(data.error || " Login failed");
         setMessageType("danger");
       }
     } catch (err) {

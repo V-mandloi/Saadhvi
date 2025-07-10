@@ -1,12 +1,8 @@
-// In: src/app/api/hospital/[id]/route.js
 
-import clientPromise from "../../../../../lib/mongodb"; // Adjust path if needed
+import clientPromise from "../../../../../lib/mongodb";
 import { ObjectId } from "mongodb";
 
-/**
- * @param {import('next/server').NextRequest} req
- * @param {{ params: { id: string } }} context
- */
+
 export async function GET(req, { params }) {
   try {
     const db = (await clientPromise).db();
@@ -27,10 +23,7 @@ export async function GET(req, { params }) {
   }
 }
 
-/**
- * @param {import('next/server').NextRequest} req
- * @param {{ params: { id: string } }} context
- */
+
 export async function DELETE(req, { params }) {
   try {
     const db = (await clientPromise).db();
@@ -54,17 +47,31 @@ export async function PUT(req, { params }) {
   try {
     const db = (await clientPromise).db();
     const hospitalId = new ObjectId(params.id);
-    const data = await req.json();
+    let data = await req.json();
 
-    const result = await db.collection("hospitals").updateOne({ _id: hospitalId }, { $set: data });
+    delete data._id;
+    delete data.createdAt;
+    delete data.updatedAt;
+
+    const result = await db.collection("hospitals").updateOne(
+      { _id: hospitalId },
+      { $set: data }
+    );
 
     if (result.matchedCount === 0) {
-      return new Response(JSON.stringify({ error: "Hospital not found, nothing updated" }), { status: 404 });
+      return new Response(JSON.stringify({ error: "Hospital not found, nothing updated" }), {
+        status: 404,
+      });
     }
 
-    return new Response(JSON.stringify({ message: "Hospital updated successfully" }), { status: 200 });
+    return new Response(
+      JSON.stringify({ message: "Hospital updated successfully" }),
+      { status: 200 }
+    );
   } catch (err) {
     console.error("PUT Hospital Error:", err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500 });
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+    });
   }
 }

@@ -1,8 +1,6 @@
-// /app/api/doctor/route.js
 import clientPromise from "../../../../lib/mongodb";
 import bcrypt from "bcrypt";
 
-// POST: Register a doctor with hashed password
 export async function POST(req) {
   try {
     const client = await clientPromise;
@@ -18,7 +16,6 @@ export async function POST(req) {
       password
     } = await req.json();
 
-    // Check if doctor already exists
     const existing = await db.collection("doctors").findOne({ email });
     if (existing) {
       return new Response(JSON.stringify({ error: "Doctor already exists" }), {

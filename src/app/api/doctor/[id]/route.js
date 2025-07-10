@@ -1,3 +1,5 @@
+// GET: Get doctor by ID
+
 import { ObjectId } from "mongodb";
 import clientPromise from "../../../../../lib/mongodb";
 import { NextResponse } from "next/server";
@@ -36,6 +38,23 @@ export async function PUT(req, context) {
   }
 }
 
+export async function GET(req, { params }) {
+  try {
+    const { id } = params;
+    const client = await clientPromise;
+    const db = client.db();
+    const doctor = await db.collection("doctors").findOne({ _id: new ObjectId(id) });
+    if (!doctor) {
+      return NextResponse.json({ error: "Doctor not found" }, { status: 404 });
+    }
+    // Optionally, you may want to remove the password field before sending
+    if (doctor.password) delete doctor.password;
+    return NextResponse.json(doctor);
+  } catch (err) {
+    console.error("GET /doctor/[id] error:", err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
 
 // DELETE: Delete doctor
 export async function DELETE(req, { params }) {

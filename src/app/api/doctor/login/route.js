@@ -1,5 +1,7 @@
+
 import clientPromise from "../../../../../lib/mongodb";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export async function POST(req) {
   try {
@@ -18,11 +20,14 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: "Invalid password" }), { status: 401 });
     }
 
+
+    const { password: _, ...doctorPayload } = doctor;
+    const token = jwt.sign(doctorPayload, process.env.JWT_SECRET, { expiresIn: "7d" });
+
     return new Response(JSON.stringify({
       message: "Login successful",
-      doctorId: doctor._id,
-      name: doctor.name,
-      specialization: doctor.specialization
+      token,
+      doctor: doctorPayload
     }), {
       status: 200,
       headers: { "Content-Type": "application/json" }

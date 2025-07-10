@@ -9,7 +9,7 @@ export default function HospitalsListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editHospital, setEditHospital] = useState(null);
-
+console.log(editHospital)
   const fetchHospitals = async () => {
     try {
       setLoading(true);
@@ -34,15 +34,28 @@ export default function HospitalsListPage() {
     setEditHospital(hospital);
   };
 
-  const handleUpdate = async () => {
-    await fetch(`/api/hospital/${editHospital._id}`, {
+const handleUpdate = async () => {
+  try {
+    const res = await fetch(`/api/hospital/${editHospital._id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editHospital),
     });
-    setEditHospital(null);
-    fetchHospitals();
-  };
+
+    if (!res.ok) {
+      const error = await res.json();
+      alert(error.error || "Failed to update hospital.");
+    } else {
+      alert("Hospital updated successfully.");
+      setEditHospital(null);
+      fetchHospitals();
+    }
+  } catch (err) {
+    console.error("Update error:", err);
+    alert("Something went wrong!");
+  }
+};
+
 
   useEffect(() => {
     fetchHospitals();

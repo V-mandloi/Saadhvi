@@ -11,7 +11,6 @@ const hospitalSchema = new mongoose.Schema({
   password: { type: String, required: true }
 }, { timestamps: true });
 
-// Hash password before saving
 hospitalSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {
     return next();
