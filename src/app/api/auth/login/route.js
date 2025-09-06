@@ -1,34 +1,75 @@
 import { NextResponse } from 'next/server';
-import clientPromise from "../../../../../lib/mongodb";
-import User from "../../models/User";
+import dbConnect from '../../../../../lib/dbConnect';
+import User from '../../models/User';
+import Doctor from '../../models/doctor';
+import Hospital from '../../models/hospital';
+import bcrypt from 'bcrypt';
 
 export async function POST(request) {
   try {
-    await clientPromise;
+    await dbConnect();
     const { email, password } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
     }
 
-    // Find user by email
-    const user = await User.findOne({ email });
+    let user = null;
+    let userRole = null;
+    let isMatch = false;
+
+    // Step 1: Check for a PRO user
+    const proUser = await User.findOne({ email }).lean(); // .lean() gives a plain object, faster for reads
+    if (proUser) {
+      isMatch = await bcrypt.compare(password, proUser.password);
+      if (isMatch) {
+        user = proUser;
+        userRole = 'PRO';
+      }
+    }
+
+    // Step 2: If not a PRO, check for a Doctor
     if (!user) {
+      const doctorUser = await Doctor.findOne({ email }).lean();
+      if (doctorUser && doctorUser.password) { // Check if user and password field exist
+        isMatch = await bcrypt.compare(password, doctorUser.password);
+        if (isMatch) {
+          user = doctorUser;
+          userRole = 'Doctor';
+        }
+      }
+    }
+
+    // Step 3: If not a Doctor, check for a Hospital
+    if (!user) {
+      const hospitalUser = await Hospital.findOne({ email }).lean();
+      if (hospitalUser && hospitalUser.password) { // Check if user and password field exist
+        isMatch = await bcrypt.compare(password, hospitalUser.password);
+        if (isMatch) {
+          user = hospitalUser;
+          userRole = 'Hospital';
+        }
+      }
+    }
+
+    // Step 4: Validate the result
+    if (!user) {
+      console.log(`Login failed for email: ${email}. User not found or password mismatch.`);
       return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
     }
 
-    // Check if password matches
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
-    }
+    // Step 5: Prepare and send the response
+    delete user.password; // IMPORTANT: Remove password before sending
+    const userToSend = { ...user, role: userRole };
 
-    // In a real app, you would generate a JWT (JSON Web Token) here.
-    // For now, we will just return a success message.
-    return NextResponse.json({ message: "Login successful!", user: { email: user.email, role: user.role } });
+    return NextResponse.json({
+      message: "Login successful!",
+      user: userToSend,
+    });
 
   } catch (error) {
-    console.error("Login Error:", error);
-    return NextResponse.json({ error: 'Failed to log in' }, { status: 500 });
+    // This will catch any unexpected crashes
+    console.error("Login API Unhandled Error:", error);
+    return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
   }
 }
